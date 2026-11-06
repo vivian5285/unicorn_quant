@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>最优方案 · 独角兽量化</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23007AFF'/%3E%3Cpath d='M9 22l3-12 4 7 4-9 3 14z' fill='white'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/app.css?v=13ti">
+<link rel="stylesheet" href="/static/best.css?v=9affgk">
+</head>
+<body>
+<div class="bg"><i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i></div>
+<header class="nav">
+  <a class="brand" href="/">
+    <svg viewBox="0 0 32 32" width="32" height="32" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5AC8FA"/><stop offset="1" stop-color="#007AFF"/></linearGradient></defs><circle cx="16" cy="16" r="16" fill="url(#lg)"/><path d="M8.5 22.5l3.2-12.5 4.3 7.4 4.3-9.4 3.2 14.5z" fill="#fff"/></svg>
+    <span>独角兽量化</span>
+  </a>
+  <nav class="pills"><a href="/">图表与回测</a><a class="on">最优方案</a><a href="/universe">全品种复盘</a><a href="/static/forward.html">前向模拟</a><a href="/static/overlay_recon.html">实盘对账</a><a href="/system/">系统说明</a><a href="/sndk">SNDK单票</a></nav>
+  <div class="nav-right"><button class="chip ghost" id="themeBtn" title="切换主题">◐</button></div>
+</header>
+
+<main class="bp">
+  <section class="hero">
+    <div class="hero-l">
+      <div class="eyebrow">当前最优解 · <span id="asof">加载中…</span></div>
+      <h1>最优方案：币圈 1 + 美股 1（2 倍）+ 波动率控制 + 突破叠加 2%</h1>
+      <p class="mut" id="planLine">两条腿放在同一个 USDT 合约全仓账户，按总资金计最高 2 倍名义仓位(不再加)，每天按权重再平衡，并做组合波动率控制(60天实际波动超过年化40%就按比例降仓，只降不加)。币圈腿 = 日线EMA8/30 + 8h超级趋势 + 8h布林突破 各 1/3(2026-10-19 由 50/25/25 改等权)。另加<b>突破叠加 2%</b>(2026-11-01 上实盘)：4h 真假突破 + 8h 布林擠壓，按每笔风险下单、不占上面的 2 倍额度，叠加自身回撤 18% 自动停。</p>
+    </div>
+    <div class="kpis" id="kpis"></div>
+  </section>
+
+  <section class="card pad" id="planCard"></section>
+
+  <section class="card pad">
+    <div class="sec-h"><div><b>权益曲线</b><span class="mut small" id="eqSub">2017-09 起，起点=1</span></div>
+      <div class="ctl"><div class="seg" id="serSeg"></div><button class="chip" id="logBtn">对数刻度</button></div></div>
+    <div id="eqChart" class="eqc"></div>
+    <div class="mut small lbl2">方案F 回撤</div>
+    <div id="ddChart" class="ddc"></div>
+    <div class="ytbl" id="yTbl"></div>
+  </section>
+
+  <div class="two">
+    <section class="card pad">
+      <div class="sec-h"><div><b>币圈腿 · 当前状态</b><span class="mut small">主流5个 · 日线EMA8/30多空</span></div></div>
+      <div class="badges" id="cBadges"></div>
+      <div class="tbl-wrap"><table class="t" id="cTbl"></table></div>
+      <div class="rule"><b>规则</b>：三条子腿各占币圈资金 1/3。①日线收盘 EMA8&gt;EMA30 持多、&lt; 持空；②8h 超级趋势(10,3)按方向持仓；③8h 收盘突破布林(25,1.25)上/下轨开仓、回到中轨离场。均为下一根开盘成交；每币分1/5资金，仓位=资金×min(1, 3%÷日ATR%)；山寨币只在BTC同方向时开新仓；减半后0–18个月只做多、18–30个月只做空、其余多空都做。</div>
+    </section>
+    <section class="card pad">
+      <div class="sec-h"><div><b>美股腿 · 本月行业轮动</b><span class="mut small" id="rotSub"></span></div></div>
+      <div class="rank" id="rank"></div>
+      <div class="sub-h">当前持仓 <span class="mut small" id="posCnt"></span></div>
+      <div class="tbl-wrap short"><table class="t" id="sTbl"></table></div>
+      <div class="pend" id="pend"></div>
+      <div class="rule"><b>规则</b>：每月按过去6个月行业涨幅取前5个行业；只做币安有美股永续的股票；正股日线 EMA8&gt;EMA30 做多，跌破或行业掉出前5离场；3×ATR硬止损；单只仓位=净值×min(1, 3%÷ATR%)÷max(当月只数,5)，总仓位≤1倍。</div>
+    </section>
+  </div>
+
+  <section class="card pad" id="review">
+    <div class="sec-h"><div><b>交易复盘</b><span class="mut small">点任意一笔，在K线上看开平仓位置和原因</span></div>
+      <div class="ctl">
+        <div class="seg" id="legSeg"><button class="on" data-v="">全部</button><button data-v="币圈">币圈</button><button data-v="美股">美股</button></div>
+        <select id="fSym"></select>
+        <select id="fRes"><option value="">全部结果</option><option value="w">盈利</option><option value="l">亏损</option><option value="o">持仓中</option></select>
+        <select id="fYear"></select>
+      </div></div>
+    <div class="rv">
+      <div class="rv-chart">
+        <div class="rv-head"><b id="rvSym">--</b><span class="mut small" id="rvMeta"></span><span class="sp"></span>
+          <span class="key"><i class="k8"></i>EMA8</span><span class="key"><i class="k30"></i>EMA30</span>
+          <button class="chip sm" id="prevBtn">‹ 上一笔</button><button class="chip sm" id="nextBtn">下一笔 ›</button><button class="chip sm" id="kfsBtn" title="全屏(F)">⛶ 全屏</button></div>
+        <div class="legbar" id="legBar"><span class="lgseg" id="legSeg"><button class="chip sm on" data-leg="all">三条腿都看</button><button class="chip sm" data-leg="日线">日线EMA</button><button class="chip sm" data-leg="超级">8h超级趋势</button><button class="chip sm" data-leg="布林">8h布林</button></span>
+          <span class="lgtxt"><b>▲</b>开多 <b>▼</b>开空 <b>●</b>平仓 <b>■</b>止损 · <i class="d1"></i>日线 <i class="d2"></i>超级趋势 <i class="d3"></i>布林 · 色条：本根结束时虚拟子腿合计，非真实账户</span></div>
+        <div class="legbar"><span class="lgseg"><button class="chip sm on" data-review-tf="1d">日线</button><button class="chip sm" data-review-tf="8h">8小时</button></span></div>
+        <div id="kChart" class="kc"></div>
+      </div>
+      <div class="rv-why" id="rvWhy"><div class="mut">选择下方一笔交易</div></div>
+    </div>
+    <div class="sumline" id="sumLine"></div>
+    <div class="tbl-wrap"><table class="t trades" id="tTbl"></table></div>
+    <div class="pager" id="pager"></div>
+  </section>
+
+  <section class="card pad" id="recon">
+    <div class="sec-h"><div><b>纸面对账：擂台 vs 回测</b><span class="mut small" id="rcSub">每天美股收盘后自动对比，找出执行偏差</span></div></div>
+    <div id="rcBody"><div class="mut">加载中…</div></div>
+  </section>
+
+  <section class="card pad">
+    <div class="sec-h"><div><b>已淘汰策略</b><span class="mut small" id="retSub">负收益，已从策略库删除，以后不再使用</span></div>
+      <button class="chip" id="retBtn">展开</button></div>
+    <div id="retBody" hidden></div>
+  </section>
+
+  <p class="foot mut small">口径：币圈用币安现货日线/8h，美股用Yahoo正股日线；每边代理成本0.08%，<b>未完整计入真实净仓资金费、基差与执行滑点</b>。
+  美股股票池是现存的78只，有幸存者偏差；2026年正好是AI行情。回测不代表未来收益，上实盘前先看擂台纸面2–3周。数据每天美股收盘后自动更新。</p>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+<script src="/static/review_math.js?v=20261023"></script>
+<script src="/static/best.js?v=20261106f2-flow2"></script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>全品种复盘 · 独角兽量化</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23007AFF'/%3E%3Cpath d='M9 22l3-12 4 7 4-9 3 14z' fill='white'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/app.css?v=13ti">
+<link rel="stylesheet" href="/static/best.css?v=5ti">
+<link rel="stylesheet" href="/static/universe.css?v=3">
+</head>
+<body>
+<div class="bg"><i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i></div>
+<header class="nav">
+  <a class="brand" href="/">
+    <svg viewBox="0 0 32 32" width="32" height="32" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5AC8FA"/><stop offset="1" stop-color="#007AFF"/></linearGradient></defs><circle cx="16" cy="16" r="16" fill="url(#lg)"/><path d="M8.5 22.5l3.2-12.5 4.3 7.4 4.3-9.4 3.2 14.5z" fill="#fff"/></svg>
+    <span>独角兽量化</span>
+  </a>
+  <nav class="pills"><a href="/">图表与回测</a><a href="/best">最优方案</a><a class="on" href="/universe">全品种复盘</a><a href="/static/forward.html">前向模拟</a><a href="/static/overlay_recon.html">实盘对账</a><a href="/system/">系统说明</a><a href="/sndk">SNDK单票</a></nav>
+  <div class="nav-right"><button class="chip ghost" id="themeBtn" title="切换主题">◐</button></div>
+</header>
+
+<main class="bp up">
+  <section class="hero">
+    <div class="hero-l">
+      <div class="eyebrow">全品种复盘 · <span id="asof">加载中…</span></div>
+      <h1>每个币、每只美股：主方案在它身上做过什么</h1>
+      <p class="mut">这里的每一笔都直接来自主方案回测（和「最优方案」页同一份数据，每天美股收盘后自动更新），不是另外跑的。另外「突破叠加贡献」一列是 11-01 起叠加到实盘的第四批两个候选(4h 真假突破 + 8h 布林擠壓，主流5币)在 2022-03 以后的回测贡献，表里其它列仍只统计方案F三条币圈腿+美股腿。
+        鼠标停在某一行上看走势和开平仓点，点进去看完整 K 线、每笔开平仓原因和逐年表现。「单独只做它」= 同一套规则，把整条腿的资金只给这一个品种，用来对比"只做一个够不够"。</p>
+    </div>
+    <div class="kpis" id="kpis"></div>
+  </section>
+
+  <div class="seg big" id="tabSeg"><button class="on" data-v="list">品种总览</button><button data-v="research">研究结论 <span class="cnt" id="resCnt"></span></button></div>
+
+  <section class="card pad" id="pList">
+    <div class="toolbar">
+      <div class="seg" id="kindSeg"><button class="on" data-v="">全部</button><button data-v="crypto">币圈</button><button data-v="stock">美股</button></div>
+      <select id="fSector"><option value="">全部行业</option></select>
+      <label class="ck"><input type="checkbox" id="fPos"> 持仓中</label>
+      <label class="ck"><input type="checkbox" id="fRot"> 本月入选</label>
+      <label class="ck"><input type="checkbox" id="fTr" checked> 只看币安可交易</label>
+      <input id="fQ" class="q" placeholder="搜索代码，如 MU / ETH" autocomplete="off">
+      <span class="sp"></span>
+      <span class="mut small" id="cnt"></span>
+    </div>
+    <div class="rot-line" id="rotLine"></div>
+    <div class="tbl-wrap"><table class="t ut" id="uTbl"></table></div>
+    <p class="mut small note">「对总资金贡献」= 这个品种所有交易对主方案总资金的贡献之和（单利近似，币圈每币占腿的 1/5 再乘子腿权重）。
+      「单独只做它」美股按日线 EMA8/30 + 3×ATR 止损 + 波动率仓位，不看行业轮动；币圈 = 日线腿在这个币上的复利。灰色行 = 币安没有这只股票的永续，主方案不交易它，只做对照。</p>
+  </section>
+
+  <section class="card pad" id="pRes" hidden>
+    <div class="sec-h"><div><b>研究结论</b><span class="mut small">每次回测研究的问题、结论和关键数字，按时间倒序</span></div>
+      <div class="seg" id="resSeg"><button class="on" data-v="">全部</button><button data-v="币圈">币圈</button><button data-v="美股">美股</button><button data-v="组合">组合</button></div></div>
+    <div id="resBody"></div>
+  </section>
+</main>
+
+<div class="hov" id="hov" hidden></div>
+<script src="/static/universe.js?v=20261102-ov"></script>
+</body>
+</html>

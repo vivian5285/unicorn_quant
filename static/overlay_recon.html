@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>实盘对账 · 独角兽量化</title>
+<link rel="stylesheet" href="/static/forward.css?v=1">
+<style>
+.ok{color:#16a34a}.bad{color:#dc2626}.warn{color:#d97706}.muted{color:#6b7280}
+.pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;border:1px solid currentColor}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+#flags li{margin:2px 0}
+</style></head>
+<body><header><strong>实盘对账</strong><nav><a href="/">图表与回测</a><a href="/best">最优方案</a><a href="/universe">全品种复盘</a><a href="/static/forward.html">前向模拟</a><a href="/system/">系统说明</a><a href="/sndk">SNDK单票</a></nav><span id="updated">加载中</span></header>
+<main>
+<section><div class="bar"><h2>月度对账：实盘 vs 回测同口径</h2><span class="muted" id="mBasis"></span></div>
+<div class="table-wrap"><table><thead><tr><th>月份</th><th>区间</th><th>净值 月初→月末</th><th>实盘收益</th><th>回测·主方案</th><th>回测·叠加</th><th>回测·资金费</th><th>回测合计</th><th>差(实盘-回测)</th><th>实盘手续费</th><th>实盘资金费</th></tr></thead><tbody id="mRows"></tbody></table></div>
+<p class="muted" id="mNote"></p></section>
+<section><div class="bar"><h2>复刻归因：实盘 − 回测 拆成四块</h2><span class="muted" id="rBand"></span></div>
+<div class="summary" id="rSum"></div>
+<div class="table-wrap"><table><thead><tr><th>区间</th><th>天数</th><th>实盘</th><th>回测同口径</th><th>差距</th><th>信号时机</th><th>持仓取整</th><th>资金费</th><th>执行成本</th><th>合理范围</th></tr></thead><tbody id="rMonths"></tbody></table></div>
+<details><summary class="muted" style="cursor:pointer;margin:8px 0">每日明细（单日受美股收盘时点错开影响，波动大，看月度和累计）</summary>
+<div class="table-wrap"><table><thead><tr><th>日期</th><th>实盘</th><th>回测</th><th>差距</th><th>信号时机</th><th>持仓取整</th><th>资金费</th><th>执行成本</th></tr></thead><tbody id="rDays"></tbody></table></div></details>
+<p class="muted" id="rNote"></p>
+<div class="bar"><h2 style="font-size:16px">按品种：擂台目标 vs 回测应持（此刻）</h2><span class="muted" id="sAsof"></span></div>
+<div class="table-wrap"><table><thead><tr><th>品种</th><th>擂台目标</th><th>回测应持</th><th>差</th><th>累计信号时机贡献</th></tr></thead><tbody id="sRows"></tbody></table></div>
+<p class="muted" id="sNote"></p></section>
+<h2 style="margin:18px 0 6px">突破叠加 · 逐笔对账</h2>
+<div class="summary" id="sum"></div>
+<section><div class="bar"><h2>需要注意</h2><span class="muted">同一问题连续两次(≥1小时)才发钉钉告警</span></div><ul id="flags"></ul></section>
+<section><div class="bar"><h2>每条腿：实盘 vs 回测</h2><span class="muted">回测基准 = 同一套实盘参数，2022 起历史每笔平均R(含费)</span></div>
+<div class="table-wrap"><table><thead><tr><th>腿</th><th>实盘已平笔数</th><th>实盘平均R</th><th>回测历史笔数</th><th>回测平均R</th><th>回测胜率</th></tr></thead><tbody id="perf"></tbody></table></div></section>
+<section><div class="bar"><h2>逐笔对照</h2><span class="muted">回测=信号K线收盘后下一根开盘成交；价差为正 = 实盘开得比回测差</span></div>
+<div class="table-wrap"><table><thead><tr><th>状态</th><th>腿</th><th>品种</th><th>方向</th><th>回测信号</th><th>回测开仓</th><th>实盘开仓</th><th>价差bp</th><th>止损距离 回测/实盘</th><th>回测平仓</th><th>实盘平仓</th><th>R 回测/实盘</th><th>备注</th></tr></thead><tbody id="rows"></tbody></table></div>
+<p class="muted">数据：回测由 engine/overlay_live_recon.py 每小时用币安永续已收盘K线重算(规则同 strategies/youtube_candidates_b4.py)；实盘=擂台 shadow_v2 + 发布器 targets.json。小账户(净值&lt;5000U)不做 BTC，BTC 的单只对照不计收益。</p></section>
+</main>
+<script>
+const f=(x,d=2)=>x==null?'—':Number(x).toLocaleString('zh-CN',{maximumFractionDigits:d});
+const cls=s=>({'配上':'ok','漏单':'bad','多单':'bad','等待':'muted'}[s]||'');
+fetch('/static/overlay_recon.json?_='+Date.now()).then(r=>r.json()).then(d=>{
+  const s=d.summary;document.getElementById('updated').textContent='更新 '+new Date(d.asof*1000).toLocaleString('zh-CN');
+  const box=(k,v,c='')=>`<div><small>${k}</small><b class="${c}">${v}</b></div>`;
+  document.getElementById('sum').innerHTML=
+    box('上实盘以来回测信号',s.bt_signals)+box('配上 / 等待',`${s.matched} / ${s.waiting}`,s.matched===s.bt_signals-s.waiting?'ok':'')+
+    box('漏单 / 多单',`${s.missed} / ${s.extra}`,s.missed||s.extra?'bad':'ok')+box('擂台开了没进目标',s.publisher_missing.length,s.publisher_missing.length?'bad':'ok')+
+    box('回测同期叠加收益',(s.bt_cum_pct>=0?'+':'')+f(s.bt_cum_pct)+'%')+box('实盘已平叠加收益',(s.live_closed_cum_pct>=0?'+':'')+f(s.live_closed_cum_pct)+'%')+
+    box('状态',d.overlay_off?'叠加已停用(OVERLAY_OFF)':(d.use_btc?'含BTC':'不含BTC(小账户)'),d.overlay_off?'warn':'');
+  const fl=[];if(s.missed)fl.push(`<li class="bad">漏单 ${s.missed} 笔：回测出了信号，擂台超过2根K线没开</li>`);
+  if(s.extra)fl.push(`<li class="bad">多单 ${s.extra} 笔：擂台开了，回测没有这个信号</li>`);
+  s.publisher_missing.forEach(x=>fl.push(`<li class="bad">擂台开着但没进实盘目标：${x}</li>`));
+  d.trades.filter(t=>t.status==='配上'&&t.flags.length).forEach(t=>fl.push(`<li class="warn">${t.name} ${t.symbol} ${t.bt_sig}：${t.flags.join('、')}</li>`));
+  document.getElementById('flags').innerHTML=fl.join('')||'<li class="ok">全部对得上</li>';
+  document.getElementById('perf').innerHTML=Object.entries(d.perf).map(([k,p])=>`<tr><td>${{jiasheng_brk_tp_4h:'真假突破4h·1.5R止盈',jiasheng_brk_trail_4h:'真假突破4h·2ATR追踪',mio_bb_squeeze_8h:'布林擠壓8h'}[k]}</td><td class="num">${p.live_n}</td><td class="num">${f(p.live_avg_R,3)}</td><td class="num">${p.bt_hist_n}</td><td class="num">${f(p.bt_hist_avg_R,3)}</td><td class="num">${p.bt_hist_win==null?'—':Math.round(100*p.bt_hist_win)+'%'}</td></tr>`).join('');
+  const rows=d.trades.slice().sort((a,b)=>(b.bt_sig||b.live_sig||'').localeCompare(a.bt_sig||a.live_sig||''));
+  document.getElementById('rows').innerHTML=rows.map(t=>`<tr><td><span class="pill ${cls(t.status)}">${t.status}</span></td><td>${t.name}</td><td>${t.symbol.replace('USDT','')}</td><td>${t.side==='LONG'?'多':'空'}</td>
+   <td>${t.bt_sig||'—'}</td><td class="num">${f(t.bt_entry,6)}</td><td class="num">${f(t.live_entry,6)}</td><td class="num">${f(t.price_bp,1)}</td>
+   <td class="num">${t.bt_rd==null?'—':(100*t.bt_rd).toFixed(2)+'%'} / ${t.live_rd==null?'—':(100*t.live_rd).toFixed(2)+'%'}</td>
+   <td>${t.bt_open?'持仓中':(t.bt_exit_t?t.bt_exit_t+' '+t.bt_why:'—')}</td><td>${t.status==='配上'?(t.live_open?'持仓中':(t.live_exit_t||'')+' '+(t.live_exit_reason||'')):'—'}</td>
+   <td class="num">${f(t.bt_R,2)} / ${f(t.live_R,2)}</td><td class="${t.flags.length?'warn':''}">${t.flags.join('、')}</td></tr>`).join('')||'<tr><td colspan="13" class="muted">11-01 上实盘以来还没有叠加信号</td></tr>';
+}).catch(e=>{document.getElementById('updated').textContent='加载失败：'+e});
+fetch('/static/monthly_report.json?_='+Date.now()).then(r=>r.json()).then(m=>{
+  const P=v=>v==null?'—':(v>=0?'+':'')+f(v,2)+'%', c=v=>v==null?'':(v>=0?'ok':'bad');
+  document.getElementById('mBasis').textContent=m.use_btc?'回测含BTC':'回测不含BTC(账户<5000U)';
+  document.getElementById('mRows').innerHTML=m.months.slice().reverse().map(x=>`<tr><td>${x.month}${x.partial?' <span class="muted">(进行中)</span>':''}</td><td>${x.from} ~ ${x.to}</td>
+   <td class="num">${f(x.eq0,2)} → ${f(x.eq1,2)}${x.transfer?` <span class="muted">(划转${f(x.transfer,2)})</span>`:''}</td><td class="num ${c(x.live_pct)}"><b>${P(x.live_pct)}</b></td>
+   <td class="num">${P(x.bt_main_pct)}</td><td class="num">${P(x.bt_overlay_pct)}</td><td class="num">${P(x.bt_funding_pct)}</td><td class="num"><b>${P(x.bt_net_pct)}</b></td>
+   <td class="num ${c(x.gap_pct)}"><b>${P(x.gap_pct)}</b></td><td class="num">${P(x.live_fee_pct)}</td><td class="num">${P(x.live_funding_pct)}</td></tr>`).join('');
+  document.getElementById('mNote').textContent=m.note+' 每月1日把上个月结果发钉钉。';
+}).catch(()=>{document.getElementById('mRows').innerHTML='<tr><td colspan="11" class="muted">月度报告还没生成</td></tr>'});
+fetch('/static/replication.json?_='+Date.now()).then(r=>r.json()).then(R=>{
+  const P=v=>v==null?'—':(v>=0?'+':'')+f(v,2)+'%', B=R.band||{}, c=v=>v==null?'':(Math.abs(v)>B.month_pct?'bad':'ok');
+  document.getElementById('rBand').innerHTML=B.ok?'<span class="ok">在合理范围内</span>':'<span class="bad">超出合理范围</span>';
+  const t=R.total||{}, l=R.last7||{}, box=(k,v,cl='')=>`<div><small>${k}</small><b class="${cl}">${v}</b></div>`;
+  document.getElementById('rSum').innerHTML=box(`累计（${R.since||'—'} 起 ${t.days||0} 天）实盘 / 回测`,`${P(t.actual)} / ${P(t.bt)}`)+box('累计差距',P(t.gap),c(t.gap))+
+    box('信号时机',P(t.timing))+box('持仓取整',P(t.rounding))+box('资金费',P(t.funding))+box('执行成本',P(t.exec))+box('近 7 天差距',P(l.gap));
+  const row=(name,x,extra)=>`<tr><td>${name}</td><td class="num">${x.days}</td><td class="num">${P(x.actual)}</td><td class="num">${P(x.bt)}</td><td class="num ${c(x.gap)}"><b>${P(x.gap)}</b></td><td class="num">${P(x.timing)}</td><td class="num">${P(x.rounding)}</td><td class="num">${P(x.funding)}</td><td class="num">${P(x.exec)}</td><td>${extra}</td></tr>`;
+  document.getElementById('rMonths').innerHTML=(R.months||[]).slice().reverse().map(m=>row(m.month+(m.partial?' <span class="muted">(进行中)</span>':''),m,Math.abs(m.gap)>B.month_pct?'<span class="pill bad">超出 ±'+B.month_pct+'%</span>':'<span class="pill ok">正常</span>')).join('')+(R.total?row('<b>累计</b>',R.total,''):'');
+  document.getElementById('rDays').innerHTML=(R.days||[]).slice().reverse().map(d=>`<tr><td>${d.day}</td><td class="num">${P(d.actual)}</td><td class="num">${P(d.bt)}</td><td class="num">${P(d.gap)}</td><td class="num">${P(d.timing)}</td><td class="num">${P(d.rounding)}</td><td class="num">${P(d.funding)}</td><td class="num">${P(d.exec)}</td></tr>`).join('');
+  const S=R.by_symbol||{};
+  document.getElementById('sAsof').textContent=S.asof_snapshot?'快照 '+new Date(S.asof_snapshot*1000).toLocaleString('zh-CN'):'';
+  document.getElementById('sRows').innerHTML=(S.rows||[]).map(x=>`<tr><td>${x.symbol.replace('USDT','')}</td><td class="num">${P(x.arena_pct)}</td><td class="num">${P(x.bt_pct)}</td><td class="num ${Math.abs(x.diff_pct)>=1?'bad':''}"><b>${P(x.diff_pct)}</b></td><td class="num">${(x.timing_cum_pct>=0?'+':'')+f(x.timing_cum_pct,3)+'%'}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">暂无</td></tr>';
+  document.getElementById('sNote').textContent=(S.note||'')+(S.timing_sum_pct!=null?` 按品种合计 ${S.timing_sum_pct>=0?'+':''}${f(S.timing_sum_pct,3)}%。`:'');
+  document.getElementById('rNote').textContent=R.note+` 合理范围：当月或已结束月份 |差距| ≤ ${B.month_pct}%，且不能连续两个月同方向超过 ${B.streak_pct}%；超出发钉钉。`+((B.problems||[]).length?' 当前：'+B.problems.join('；'):'');
+}).catch(()=>{document.getElementById('rMonths').innerHTML='<tr><td colspan="10" class="muted">复刻归因还没生成</td></tr>'});
+</script></body></html>

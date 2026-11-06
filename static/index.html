@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>独角兽量化 Unicorn Quant</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23007AFF'/%3E%3Cpath d='M9 22l3-12 4 7 4-9 3 14z' fill='white'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/app.css?v=16fsti">
+</head>
+<body>
+<div class="bg"><i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i></div>
+
+<div class="tape" id="tape"><div class="tape-in" id="tapeIn"></div></div>
+
+<header class="nav">
+  <div class="brand">
+    <svg viewBox="0 0 32 32" width="32" height="32" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5AC8FA"/><stop offset="1" stop-color="#007AFF"/></linearGradient></defs><circle cx="16" cy="16" r="16" fill="url(#lg)"/><path d="M8.5 22.5l3.2-12.5 4.3 7.4 4.3-9.4 3.2 14.5z" fill="#fff"/><circle cx="21.8" cy="9.2" r="1.3" fill="#fff"/></svg>
+    <span>独角兽量化</span>
+  </div>
+  <nav class="pills" id="mainNav">
+    <a data-go="chart" class="on">图表</a><a data-go="strategy">回测工作台</a><a data-go="us">美股研究</a><a data-go="scan">美股扫描</a><a data-go="trade">交易</a><a data-go="records">账户</a>
+  </nav>
+  <a class="btn-pink sm" href="/best" style="text-decoration:none;white-space:nowrap">★ 最优方案</a>
+  <a class="chip sm" href="/universe" style="text-decoration:none;white-space:nowrap">◎ 全品种复盘</a>
+  <div class="search" id="navSearch"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M10.5 4a6.5 6.5 0 105.1 10.5l4.5 4.5 1.4-1.4-4.5-4.5A6.5 6.5 0 0010.5 4zm0 2a4.5 4.5 0 110 9 4.5 4.5 0 010-9z" fill="currentColor"/></svg><span>搜索交易对</span><kbd>/</kbd></div>
+  <div class="nav-right">
+    <button class="chip ghost" id="themeBtn" title="切换主题">◐</button>
+    <div class="chip net"><i class="dot"></i>Binance 合约</div>
+    <button class="btn-pink sm" id="authBtn">连接</button>
+  </div>
+</header>
+
+<main class="grid">
+  <div class="col-main">
+  <section class="card chart-card" id="sec-chart">
+    <div class="ch-head">
+      <button class="pair" id="pairBtn"><span class="ico" id="pairIco">B</span><b id="pairName">BTCUSDT</b><em>永续</em><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></button>
+      <div class="px"><div class="big" id="px">--</div><div class="chg" id="chg">--</div></div>
+      <div class="mstats" id="mstats"></div>
+      <div class="seg" id="itvSeg"></div>
+    </div>
+    <div class="ch-tools">
+      <div class="chips" id="indChips"></div>
+      <button class="chip add" id="addInd">＋ 指标</button>
+      <button class="chip" id="sigBtn">策略信号 开</button>
+      <button class="chip" id="fsBtn" title="全屏看K线(F 键或按钮进入/退出；截图按Esc不会退出)">⛶ 全屏</button>
+      <span class="sp"></span>
+      <div class="draw" id="drawTools">
+        <button data-tool="" class="on" title="光标">✥</button>
+        <button data-tool="h" title="水平线">─</button>
+        <button data-tool="t" title="趋势线">╱</button>
+        <button data-tool="r" title="矩形">▭</button>
+        <button data-tool="clear" title="清除绘图">⌫</button>
+      </div>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div class="chart-wrap"><div id="chartMain"></div><canvas id="draw"></canvas><div class="skeleton" id="skel"></div>
+      <div class="sigkey"><span><i class="k up">▲</i>开多</span><span><i class="k dn">▼</i>开空</span><span><i class="k pk">●</i>平多/平空</span><span><i class="k or">■</i>硬止损</span><span><i class="k ln"></i>进出场连线(盈绿亏红)</span></div>
+    </div>
+    <div id="chartSub"></div>
+  </section>
+
+  <section class="card wb" id="sec-bt">
+    <div class="wb-head">
+      <div class="wb-title"><b>回测工作台</b><span class="ctx" id="btCtx">--</span></div>
+      <div class="wb-ctrl">
+        <label>根数<select id="stBars"><option value="500">500</option><option value="1000">1000</option><option value="1500" selected>1500</option><option value="3000">3000</option><option value="6000">6000</option></select></label>
+        <label>杠杆<input id="stLev" value="1" inputmode="decimal"></label>
+        <label class="chk"><input type="checkbox" id="stLong">仅做多</label>
+        <label class="grow">参数<input id="stParams" placeholder='JSON，可空' spellcheck="false"></label>
+        <button class="btn-pink sm" id="btBtn">运行回测</button>
+      </div>
+    </div>
+    <div class="spills" id="stPills"></div>
+    <div class="wb-sel"><select id="stSel"></select><span class="mut small" id="stDesc"></span><span class="mut small" id="stCount"></span></div>
+    <div class="wb-body" id="wbBody">
+      <div class="empty">选择策略后自动回测当前品种与周期</div>
+    </div>
+  </section>
+  </div>
+
+  <aside class="side">
+    <div class="card swap" id="sec-trade">
+      <div class="swap-head"><div class="tabs"><a class="on">交易</a></div>
+        <span class="mut small" id="acctLine">--</span></div>
+      <div id="tab-trade">
+        <div class="seg wide" id="sideSeg"><button class="on long" data-s="LONG">做多</button><button class="short" data-s="SHORT">做空</button></div>
+        <div class="box">
+          <div class="lbl"><span>支付</span><span class="mut" id="cashLbl">可用 --</span></div>
+          <div class="row"><input id="amt" inputmode="decimal" placeholder="0" value="1000"><button class="token"><i class="ico sm u">$</i>USDT</button></div>
+          <div class="lbl"><span class="mut" id="amtUsd">杠杆后名义 --</span><span class="quick"><a data-p="0.25">25%</a><a data-p="0.5">50%</a><a data-p="1">最大</a></span></div>
+        </div>
+        <div class="arrow"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 3v10M3.5 8.5L8 13l4.5-4.5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="box">
+          <div class="lbl"><span>获得敞口</span><span class="mut" id="lvLbl">杠杆 3x</span></div>
+          <div class="row"><div class="out" id="outQty">0</div><button class="token" id="tokenBtn2"><i class="ico sm" id="outIco">B</i><span id="outSym">BTC</span></button></div>
+          <input type="range" id="lev" min="1" max="20" step="1" value="3">
+        </div>
+        <div class="info">
+          <div><span>成交价格(市价)</span><b id="infPx">--</b></div>
+          <div><span>手续费(0.05%)</span><b id="infFee">--</b></div>
+          <div><span>通道</span><b id="infMode">模拟盘</b></div>
+        </div>
+        <div class="seg wide mode" id="modeSeg"><button class="on" data-m="paper">模拟盘</button><button data-m="live">实盘验证</button></div>
+        <button class="btn-pink big" id="goBtn">开仓</button>
+        <div class="hint" id="modeHint">模拟盘用币安实时价撮合，不动真钱。</div>
+        <div id="curPos"></div>
+      </div>
+    </div>
+    <div class="card wl" id="sec-wl">
+      <div class="wl-head"><b>自选行情</b><span class="mut small">点击切换</span></div>
+      <div id="wlBody"></div>
+    </div>
+  </aside>
+</main>
+
+<section class="card records" id="sec-records">
+  <div class="tabs" id="recTabs"><a class="on" data-r="pp">模拟盘持仓</a><a data-r="ph">模拟盘历史</a></div>
+  <div class="tbl-wrap" id="recBody"></div>
+</section>
+<footer>独角兽量化 · 行情来自币安合约公开接口 · 回测含0.05%单边手续费，不含滑点与资金费率，不代表未来收益 · 默认模拟盘，实盘仅验证单</footer>
+
+<div class="statusbar"><span><i class="dot"></i><span id="sbConn">连接中</span></span><span id="sbLat">延迟 --</span><span id="sbMode">模拟盘</span><span id="sbSym">--</span><span class="sp"></span><span id="sbClock">--</span></div>
+
+<!-- 交易对选择 -->
+<div class="modal" id="mdPair" hidden><div class="sheet">
+  <div class="sh-head"><b>选择交易对</b><button class="x" data-close>✕</button></div>
+  <div class="seg wide" id="pairTabs" style="margin:0 0 10px"><button class="on" data-pt="crypto">加密货币</button><button data-pt="stock">美股</button></div>
+  <input id="pairQ" placeholder="搜索名称，如 BTC / ETH / NVDA / 苹果" autocomplete="off">
+  <div class="popular" id="popular"></div>
+  <div class="plist" id="pairList"></div>
+</div></div>
+<!-- 添加指标 -->
+<div class="modal" id="mdInd" hidden><div class="sheet sm">
+  <div class="sh-head"><b>添加指标</b><button class="x" data-close>✕</button></div>
+  <div class="ind-grid" id="indGrid"></div>
+</div></div>
+<!-- 美股趋势突破扫描器 -->
+<div class="modal" id="mdSc" hidden><div class="sheet xl">
+  <div class="sh-head"><b>美股趋势突破扫描器 <span class="mut small" id="scSub"></span></b><button class="x" data-close>✕</button></div>
+  <div class="mx-ctl"><span class="mut small" id="scStat">加载中…</span><span class="sp"></span><button class="btn-pink sm" id="scGo">立即刷新</button></div>
+  <div class="tabs" id="scTabs" style="margin:6px 0"><a class="on" data-st2="sig">今日信号</a><a data-st2="recent">近期突破</a><a data-st2="all">全池状态</a><a data-st2="paper">模拟盘跟踪</a><a data-st2="rules">规则与风险</a></div>
+  <div class="mx-body" id="scBody"></div>
+</div></div>
+<!-- 美股研究 -->
+<div class="modal" id="mdMx" hidden><div class="sheet xl">
+  <div class="sh-head"><b>美股策略适配矩阵 <span class="mut small" id="mxSub"></span></b><button class="x" data-close>✕</button></div>
+  <div class="mx-ctl">
+    <div class="seg" id="mxMode"><button data-mode="lo" class="on">仅做多</button><button data-mode="ls">多空双向</button></div>
+    <label class="small mut">排序<select id="mxMetric"><option value="sh">夏普比率</option><option value="rd">收益/回撤比</option><option value="r">总收益</option><option value="ex">超额(对买入持有)</option></select></label>
+    <label class="small mut">最少笔数<select id="mxMin"><option>3</option><option>5</option><option selected>8</option><option>15</option><option>30</option></select></label>
+    <label class="small mut chk2"><input type="checkbox" id="mxRobust" checked>仅稳健(前/后半段都盈利)</label>
+    <span class="sp"></span><button class="btn-pink sm" id="mxGo">重新扫描</button>
+  </div>
+  <div class="prog"><i id="mxBar"></i></div><div class="mut small" id="mxStat">加载中…</div>
+  <div class="tabs" id="mxTabs" style="margin:10px 0 6px"><a class="on" data-mt="rec">个股推荐</a><a data-mt="heat">热力图</a><a data-mt="strat">策略总览</a></div>
+  <div class="spills" id="mxSectors"></div>
+  <div class="mx-body" id="mxBody"></div>
+  <div class="hint" style="text-align:left">口径：Yahoo 日线(约5年，拆股调整，不含分红)，初始1万、满仓、单边0.05%手续费、无滑点；「稳健」指把区间平分为前后两半，两半都盈利。扫描是同一段历史上的样本内表现，从上千个组合里挑最好的有选择偏差——请当作"候选清单"而不是"买入信号"，并在其他周期/时间段继续验证。美股仅支持看图与回测。</div>
+</div></div>
+<!-- 策略库 -->
+<div class="modal" id="mdSt" hidden><div class="sheet lg">
+  <div class="sh-head"><b>策略库 <span class="mut small" id="stLibCount"></span></b><button class="x" data-close>✕</button></div>
+  <div class="tabs" id="stTabs"><a class="on" data-t="browse">浏览与对比</a><a data-t="scan">全库扫描</a></div>
+  <div id="stBrowse">
+    <input id="stQ" placeholder="搜索策略名或说明，如 macd / cci / 缠论 / 残差" autocomplete="off">
+    <div class="spills" id="stCats"></div>
+    <div class="stlist" id="stList"></div>
+    <div class="stfoot"><span class="mut small" id="pickInfo">勾选后可一次对比（最多16个）</span><span class="sp"></span><a class="lnk" id="pickCat">勾选本类全部可回测</a><button class="btn-pink sm" id="cmpPick" disabled>对比所选</button></div>
+  </div>
+  <div id="stScan" hidden>
+    <div class="scan-top"><div class="mut small" id="scanCtx"></div><span class="sp"></span>
+      <label class="small mut">根数 <select id="scanBars"><option>500</option><option selected>1000</option><option>1500</option><option>3000</option></select></label>
+      <label class="small mut">最少笔数 <select id="scanMin"><option>1</option><option>5</option><option selected>10</option><option>20</option></select></label>
+      <button class="btn-pink sm" id="scanGo">开始扫描</button></div>
+    <div class="prog"><i id="scanBar"></i></div><div class="mut small" id="scanStat">未开始</div>
+    <div class="scan-tbl" id="scanTbl"></div>
+    <div class="hint" style="text-align:left">注意：扫描结果是同一段历史上的样本内表现；从上百个策略里挑收益最高的，天然带有选择偏差，建议再换品种/周期验证。依赖资金费率、持仓量或需币种池横截面排名的策略不适用于单品种回测，已自动跳过。</div>
+  </div>
+</div></div>
+<!-- 登录 -->
+<div class="modal" id="mdLogin" hidden><div class="sheet sm">
+  <div class="sh-head"><b>连接独角兽量化</b><button class="x" data-close>✕</button></div>
+  <p class="mut">输入访问密码以解锁交易与复盘功能。</p>
+  <input id="pw" type="password" placeholder="访问密码" autocomplete="current-password">
+  <button class="btn-pink big" id="loginGo">连接</button>
+  <div class="err" id="loginErr"></div>
+</div></div>
+<div class="toasts" id="toasts"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+<script src="/static/app.js?v=21stitch"></script>
+</body>
+</html>

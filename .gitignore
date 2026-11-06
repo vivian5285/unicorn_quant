@@ -1,0 +1,36 @@
+# Source-only repository for Unicorn Quant
+
+# Secrets and local config
+.env
+.env.*
+**/.env
+**/.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Runtime data, generated output and caches
+optimal_data/
+fusion_cache/
+stock_cache/
+scanner_data/
+sweeps/
+backups/
+static/**/*.json
+static/*.json
+static/forward-data/
+
+# Logs, databases, compiled and backup files
+*.log
+*.db
+*.sqlite
+*.sqlite3
+__pycache__/
+*.py[cod]
+*.bak*
+*.before*
+
+# Live operational docs with account snapshots
+SYSTEM_OVERVIEW.md
+CLAUDE_CHANGES.md

@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>前向模拟 · 独角兽量化</title><link rel="stylesheet" href="/static/forward.css?v=1"></head>
+<body><header><strong>前向模拟</strong><nav><a href="/best">最优方案</a><a href="/universe">全品种复盘</a><a href="/static/overlay_recon.html">实盘对账</a><a href="/system/">系统说明</a><a href="/sndk">SNDK单票</a></nav><span id="updated">连接中</span></header>
+<main><div class="summary"><div><small>起始本金 / 账户</small><b>1,000 USDT</b></div><div><small>开始时间</small><b id="born">—</b></div><div><small>价格策略候选</small><b>SNDK 已纳入</b></div><div><small>交易范围</small><b>仅纸面模拟</b></div></div>
+<div class="bar"><div class="tabs"><button data-group="combo" class="on">组合对照</button><button data-group="SNDK">SNDK专项</button></div><span id="basis"></span></div>
+<div id="health" role="status"></div><div class="table-wrap"><table><thead><tr><th>观察排序 / 候选</th><th>扣费净值</th><th>净收益</th><th>盯市回撤</th><th>手续费</th><th>净资金费</th><th>净名义倍数</th><th>样本状态</th></tr></thead><tbody id="rows"></tbody></table></div>
+<section><div class="bar"><h2>同本金净值</h2><span id="costs"></span></div><div id="curve"></div></section>
+<section><div class="bar"><h2>净仓与虚拟腿</h2><span id="selected"></span></div><div class="table-wrap"><table><thead><tr><th>品种</th><th>实际纸面净数量</th><th>净仓均价</th><th>虚拟腿数</th></tr></thead><tbody id="positions"></tbody></table></div><p id="skipped"></p></section>
+</main><script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script><script src="/static/forward.js?v=1"></script></body></html>

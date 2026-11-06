@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SNDK单票复盘 · 独角兽量化</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23007AFF'/%3E%3Cpath d='M9 22l3-12 4 7 4-9 3 14z' fill='white'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/app.css?v=13ti">
+<link rel="stylesheet" href="/static/best.css?v=5ti">
+<link rel="stylesheet" href="/static/universe.css?v=3">
+<style>
+.sk-rules{max-width:860px;line-height:1.6}
+.sk-state{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.ln.e7{background:#F5B83D}.ln.e25{background:#4C82FB}.ln.stp{background:#FF3B30;height:0;border-top:2px dashed #FF3B30}
+.x{color:#FF3B30;font-weight:700}
+.dot.wk{background:#8E8E93;opacity:.6}
+#tTbl td.why{min-width:260px;max-width:460px}
+.bd.half{background:rgba(255,149,0,.15);color:#FF9500}
+</style>
+</head>
+<body>
+<div class="bg"><i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i></div>
+<header class="nav">
+  <a class="brand" href="/">
+    <svg viewBox="0 0 32 32" width="32" height="32" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5AC8FA"/><stop offset="1" stop-color="#007AFF"/></linearGradient></defs><circle cx="16" cy="16" r="16" fill="url(#lg)"/><path d="M8.5 22.5l3.2-12.5 4.3 7.4 4.3-9.4 3.2 14.5z" fill="#fff"/></svg>
+    <span>独角兽量化</span>
+  </a>
+  <nav class="pills"><a href="/">图表与回测</a><a href="/best">最优方案</a><a href="/universe">全品种复盘</a><a href="/static/forward.html">前向模拟</a><a href="/static/overlay_recon.html">实盘对账</a><a href="/system/">系统说明</a><a class="on" href="/sndk">SNDK单票</a></nav>
+  <div class="nav-right"><button class="chip ghost" id="themeBtn" title="切换主题">◐</button></div>
+</header>
+
+<main class="bp up">
+  <section class="hero sh">
+    <div class="hero-l">
+      <div class="symh"><i class="av big" style="background:#AF52DE">SN</i><div><h1 id="title">SNDK单票方案 · 加载中…</h1><div class="mut" id="sub"></div></div></div>
+      <div class="mut small sk-rules" id="rules"></div>
+      <div class="sk-state" id="state"></div>
+    </div>
+    <div class="kpis" id="kpis"></div>
+  </section>
+
+  <section class="card pad" id="kCard">
+    <div class="sec-h"><div><b>1 小时 K 线 · 每一笔开平仓</b><span class="mut small" id="kSub"></span></div>
+      <div class="ctl">
+        <div class="seg" id="rngSeg"><button data-v="7">1周</button><button data-v="30" class="on">1月</button><button data-v="90">3月</button><button data-v="0">全部</button></div>
+        <button class="chip sm" id="stopBtn" title="显示止损线">止损线</button>
+        <button class="chip sm" id="wkBtn" title="显示纽约周末被跳过的交叉">周末跳过</button>
+        <button class="chip sm" id="fsBtn" title="全屏(F 键)">⛶ 全屏</button>
+      </div></div>
+    <div class="klgd small mut" id="klgd"></div>
+    <div class="kwrap"><div id="kc" class="kc2"></div><div class="kinfo" id="kinfo"></div></div>
+    <div class="evt small" id="evt"><span class="mut">时间都是北京时间。鼠标移到 K 线上看这根的开平仓原因；点下面交易表任意一行，K 线跳到那一笔。</span></div>
+  </section>
+
+  <section class="card pad">
+    <div class="sec-h"><div><b>实盘成交 vs 回测</b><span class="mut small" id="lSub"></span></div></div>
+    <div class="tbl-wrap"><table class="t trades st" id="lTbl"></table></div>
+  </section>
+
+  <section class="card pad">
+    <div class="sec-h"><div><b>回测净值 vs 买入持有</b><span class="mut small" id="eqSub">起点 = 1</span></div></div>
+    <div id="eqc" class="eqc2"></div>
+    <div class="klgd small" id="eqLgd"></div>
+  </section>
+
+  <section class="card pad">
+    <div class="sec-h"><div><b>全部交易</b><span class="mut small" id="tSub"></span></div>
+      <div class="ctl"><select id="fRes"><option value="">全部结果</option><option value="w">盈利</option><option value="l">亏损</option><option value="s">止损出场</option><option value="a">实盘开始后</option></select></div></div>
+    <div class="tbl-wrap"><table class="t trades st" id="tTbl"></table></div>
+  </section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+<script src="/static/sndk.js?v=4"></script>
+</body>
+</html>
